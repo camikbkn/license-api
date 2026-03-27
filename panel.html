@@ -2,15 +2,102 @@
 <html>
 <head>
     <title>Panel Licencias</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: url("https://images.unsplash.com/photo-1605902711622-cfb43c4437b5") no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+        }
+
+        .overlay {
+            background: rgba(0,0,0,0.75);
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.8);
+            border-bottom: 2px solid #444;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .card {
+            background: #2c2c3e;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px auto;
+            max-width: 500px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        button {
+            background: #4CAF50;
+            border: none;
+            padding: 8px 12px;
+            margin: 5px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button.red { background: #e74c3c; }
+        button.back { background: #555; }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .ip-item {
+            background: #1e1e2f;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+
+        .login {
+            text-align: center;
+            padding-top: 100px;
+        }
+
+    </style>
 </head>
+
 <body>
 
-<h2>Panel de Licencias</h2>
+<div class="overlay">
 
-<div id="panel"></div>
+<div class="header">
+    🎮 Codigo Argentino Interlude
+</div>
+
+<div class="container">
+
+<div id="login"></div>
+<div id="panel" style="display:none;"></div>
+
+</div>
+
+</div>
 
 <script>
 
+// 🔐 LOGIN SIMPLE (puede cambiarse)
+const USER = "admin";
+const PASS = "1234";
+
+// 🔐 DATA
 let data = {
     BR: {
         active: true,
@@ -19,69 +106,124 @@ let data = {
         ]
     },
     TVT: {
-        active: true,
+        active: false,
         ips: [
-            { ip: "181.10.10.10", desc: "Evento PvP" }
+            { ip: "181.10.10.10", desc: "PvP Arena" }
         ]
     }
 };
 
-function render() {
-    let panel = document.getElementById("panel");
-    panel.innerHTML = "";
+// LOGIN UI
+function renderLogin() {
+    document.getElementById("login").innerHTML = `
+        <div class="card login">
+            <h2>Login Admin</h2>
+            <input id="user" placeholder="Usuario"><br>
+            <input id="pass" type="password" placeholder="Contraseña"><br>
+            <button onclick="login()">Entrar</button>
+        </div>
+    `;
+}
 
-    for (let event in data) {
-        let div = document.createElement("div");
-        div.style.border = "1px solid black";
-        div.style.margin = "10px";
-        div.style.padding = "10px";
+function login() {
+    let u = document.getElementById("user").value;
+    let p = document.getElementById("pass").value;
 
-        div.innerHTML = `
-            <h3>Evento ${event}</h3>
-            <button onclick="activar('${event}')">Activar</button>
-            <button onclick="desactivar('${event}')">Desactivar</button>
-            
-            <br><br>
-            <input id="ip_${event}" placeholder="IP">
-            <input id="desc_${event}" placeholder="Descripción">
-            <button onclick="agregarIP('${event}')">Agregar</button>
-
-            <ul id="lista_${event}"></ul>
-        `;
-
-        panel.appendChild(div);
-
-        let lista = div.querySelector(`#lista_${event}`);
-
-        data[event].ips.forEach(obj => {
-            let li = document.createElement("li");
-            li.textContent = obj.ip + " - " + obj.desc;
-            lista.appendChild(li);
-        });
+    if (u === USER && p === PASS) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("panel").style.display = "block";
+        renderHome();
+    } else {
+        alert("Credenciales incorrectas");
     }
 }
 
-function agregarIP(evento) {
-    let ip = document.getElementById("ip_" + evento).value;
-    let desc = document.getElementById("desc_" + evento).value;
+// HOME
+function renderHome() {
+    let panel = document.getElementById("panel");
+    panel.innerHTML = "<h3>Seleccionar Evento</h3>";
+
+    for (let event in data) {
+        let card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
+            <h3>${event}</h3>
+            <p>${data[event].active ? "🟢 Activo" : "🔴 Inactivo"}</p>
+            <button onclick="openEvent('${event}')">Entrar</button>
+        `;
+
+        panel.appendChild(card);
+    }
+}
+
+// EVENT VIEW
+function openEvent(event) {
+    let panel = document.getElementById("panel");
+
+    let d = data[event];
+
+    panel.innerHTML = `
+        <button class="back" onclick="renderHome()">⬅ Volver</button>
+
+        <div class="card">
+            <h3>Evento: ${event}</h3>
+            <p>Estado: ${d.active ? "🟢 ACTIVO" : "🔴 INACTIVO"}</p>
+
+            <button onclick="activar('${event}')">Activar</button>
+            <button class="red" onclick="desactivar('${event}')">Desactivar</button>
+
+            <hr>
+
+            <div id="lista"></div>
+
+            <hr>
+
+            <input id="ip" placeholder="IP">
+            <input id="desc" placeholder="Descripción">
+            <button onclick="agregarIP('${event}')">Agregar</button>
+        </div>
+    `;
+
+    renderLista(event);
+}
+
+// LISTA
+function renderLista(event) {
+    let lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data[event].ips.forEach(obj => {
+        let div = document.createElement("div");
+        div.className = "ip-item";
+        div.textContent = obj.ip + " → " + obj.desc;
+        lista.appendChild(div);
+    });
+}
+
+// FUNCIONES
+function agregarIP(event) {
+    let ip = document.getElementById("ip").value;
+    let desc = document.getElementById("desc").value;
 
     if (!ip) return;
 
-    data[evento].ips.push({ ip, desc });
-    render();
+    data[event].ips.push({ ip, desc });
+    openEvent(event);
 }
 
-function activar(evento) {
-    data[evento].active = true;
-    alert("Evento activado");
+function activar(event) {
+    data[event].active = true;
+    openEvent(event);
 }
 
-function desactivar(evento) {
-    data[evento].active = false;
-    alert("Evento desactivado");
+function desactivar(event) {
+    data[event].active = false;
+    openEvent(event);
 }
 
-render();
+// INIT
+renderLogin();
 
 </script>
 
