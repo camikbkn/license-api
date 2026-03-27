@@ -61,6 +61,31 @@ app.post("/add-ip", (req, res) => {
     res.json({ success: true });
 });
 
+// ❌ ELIMINAR IP
+app.post("/delete-ip", (req, res) => {
+    const { event, ip } = req.body;
+
+    if (licenses[event]) {
+        licenses[event].ips = licenses[event].ips.filter(i => i.ip !== ip);
+    }
+
+    res.json({ success: true });
+});
+
+// ✏️ EDITAR IP (solo descripción)
+app.post("/edit-ip", (req, res) => {
+    const { event, ip, desc } = req.body;
+
+    if (licenses[event]) {
+        const found = licenses[event].ips.find(i => i.ip === ip);
+        if (found) {
+            found.desc = desc;
+        }
+    }
+
+    res.json({ success: true });
+});
+
 // 🔄 ACTIVAR / DESACTIVAR
 app.post("/toggle", (req, res) => {
     const { event, active } = req.body;
