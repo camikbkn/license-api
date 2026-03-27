@@ -1,6 +1,11 @@
 const express = require("express");
 const app = express();
 const fs = require("fs");
+const mongoose = require("mongoose");
+
+mongoose.connect("mongodb+srv://admin:27012013Elu@cluster0.b1h2exo.mongodb.net/?appName=Cluster0")
+.then(() => console.log("Mongo conectado"))
+.catch(err => console.log(err));
 
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
