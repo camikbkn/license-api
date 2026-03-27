@@ -225,6 +225,13 @@ async function agregarIP(event) {
     if (!ip) return;
 
     try {
+        // 🔥 PRIMERA LLAMADA: DESPERTAR API
+        await fetch("https://license-api-81ih.onrender.com/data");
+
+        // ⏳ pequeña espera (clave)
+        await new Promise(r => setTimeout(r, 1500));
+
+        // 🔥 SEGUNDA LLAMADA: GUARDAR
         const res = await fetch("https://license-api-81ih.onrender.com/add-ip", {
             method: "POST",
             headers: {
@@ -236,7 +243,7 @@ async function agregarIP(event) {
         const result = await res.json();
 
         if (!result.success) {
-            alert("La API respondió error");
+            alert("Error en API");
             return;
         }
 
@@ -244,7 +251,7 @@ async function agregarIP(event) {
 
     } catch (e) {
         console.error("ERROR REAL:", e);
-        alert("No conecta con API (posible sleep de Render)");
+        alert("La API está dormida, intentá de nuevo en 3 segundos");
     }
 }
 async function activar(event) {
