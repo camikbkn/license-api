@@ -7,42 +7,67 @@
 
 <h2>Panel de Licencias</h2>
 
-<div>
-    <h3>Evento BR</h3>
-    <button onclick="activar('BR')">Activar</button>
-    <button onclick="desactivar('BR')">Desactivar</button>
-
-    <input id="ipBR" placeholder="Agregar IP">
-    <button onclick="agregarIP('BR')">Agregar</button>
-
-    <ul id="listaBR"></ul>
-</div>
+<div id="panel"></div>
 
 <script>
 
 let data = {
     BR: {
         active: true,
-        ips: ["186.23.164.145"]
+        ips: [
+            { ip: "186.23.164.145", desc: "Evento de Tomi" }
+        ]
+    },
+    TVT: {
+        active: true,
+        ips: [
+            { ip: "181.10.10.10", desc: "Evento PvP" }
+        ]
     }
 };
 
 function render() {
-    let lista = document.getElementById("listaBR");
-    lista.innerHTML = "";
+    let panel = document.getElementById("panel");
+    panel.innerHTML = "";
 
-    data.BR.ips.forEach(ip => {
-        let li = document.createElement("li");
-        li.textContent = ip;
-        lista.appendChild(li);
-    });
+    for (let event in data) {
+        let div = document.createElement("div");
+        div.style.border = "1px solid black";
+        div.style.margin = "10px";
+        div.style.padding = "10px";
+
+        div.innerHTML = `
+            <h3>Evento ${event}</h3>
+            <button onclick="activar('${event}')">Activar</button>
+            <button onclick="desactivar('${event}')">Desactivar</button>
+            
+            <br><br>
+            <input id="ip_${event}" placeholder="IP">
+            <input id="desc_${event}" placeholder="Descripción">
+            <button onclick="agregarIP('${event}')">Agregar</button>
+
+            <ul id="lista_${event}"></ul>
+        `;
+
+        panel.appendChild(div);
+
+        let lista = div.querySelector(`#lista_${event}`);
+
+        data[event].ips.forEach(obj => {
+            let li = document.createElement("li");
+            li.textContent = obj.ip + " - " + obj.desc;
+            lista.appendChild(li);
+        });
+    }
 }
 
 function agregarIP(evento) {
-    let input = document.getElementById("ipBR").value;
-    if (!input) return;
+    let ip = document.getElementById("ip_" + evento).value;
+    let desc = document.getElementById("desc_" + evento).value;
 
-    data[evento].ips.push(input);
+    if (!ip) return;
+
+    data[evento].ips.push({ ip, desc });
     render();
 }
 
