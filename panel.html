@@ -127,20 +127,46 @@ function renderLogin() {
     `;
 }
 
-function login() {
+async function login() {
     let u = document.getElementById("user").value;
     let p = document.getElementById("pass").value;
 
-    const found = USERS.find(acc => acc.user === u && acc.pass === p);
+    try {
+        const res = await fetch("https://license-api-81ih.onrender.com/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ user: u, pass: p })
+        });
 
-    if (found) {
-        document.getElementById("login").style.display = "none";
-        document.getElementById("panel").style.display = "block";
-        renderHome();
-    } else {
-        alert("Credenciales incorrectas");
+        const result = await res.json();
+
+        if (result.success) {
+            document.getElementById("login").style.display = "none";
+            document.getElementById("panel").style.display = "block";
+            loadData(); // 👈 IMPORTANTE
+        } else {
+            alert("Credenciales incorrectas");
+        }
+
+    } catch (e) {
+        alert("Error conectando con la API");
+        console.error(e);
     }
 }
+
+async function loadData() {
+    try {
+        const res = await fetch("https://license-api-81ih.onrender.com/data");
+        data = await res.json();
+        renderHome();
+    } catch (e) {
+        alert("Error cargando datos");
+        console.error(e);
+    }
+}
+
 
 // HOME
 function renderHome() {
@@ -206,24 +232,45 @@ function renderLista(event) {
 }
 
 // FUNCIONES
-function agregarIP(event) {
+async function agregarIP(event) {
     let ip = document.getElementById("ip").value;
     let desc = document.getElementById("desc").value;
 
     if (!ip) return;
 
-    data[event].ips.push({ ip, desc });
-    openEvent(event);
+    await fetch("https://license-api-81ih.onrender.com/add-ip", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ event, ip, desc })
+    });
+
+    loadData();
 }
 
-function activar(event) {
-    data[event].active = true;
-    openEvent(event);
+async function activar(event) {
+    await fetch("https://license-api-81ih.onrender.com/toggle", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ event, active: true })
+    });
+
+    loadData();
 }
 
-function desactivar(event) {
-    data[event].active = false;
-    openEvent(event);
+async function desactivar(event) {
+    await fetch("https://license-api-81ih.onrender.com/toggle", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ event, active: false })
+    });
+
+    loadData();
 }
 
 // INIT
