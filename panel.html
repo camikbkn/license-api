@@ -127,32 +127,18 @@ function renderLogin() {
     `;
 }
 
-async function login() {
+function login() {
     let u = document.getElementById("user").value;
     let p = document.getElementById("pass").value;
 
-    try {
-        const res = await fetch("https://license-api-81ih.onrender.com/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ user: u, pass: p })
-        });
+    const found = USERS.find(acc => acc.user === u && acc.pass === p);
 
-        const result = await res.json();
-
-        if (result.success) {
-            document.getElementById("login").style.display = "none";
-            document.getElementById("panel").style.display = "block";
-            loadData(); // 👈 IMPORTANTE
-        } else {
-            alert("Credenciales incorrectas");
-        }
-
-    } catch (e) {
-        alert("Error conectando con la API");
-        console.error(e);
+    if (found) {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("panel").style.display = "block";
+        loadData();
+    } else {
+        alert("Credenciales incorrectas");
     }
 }
 
