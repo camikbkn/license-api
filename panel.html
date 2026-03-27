@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel Licencias</title>
+</head>
+<body>
+
+<h2>Panel de Licencias</h2>
+
+<div>
+    <h3>Evento BR</h3>
+    <button onclick="activar('BR')">Activar</button>
+    <button onclick="desactivar('BR')">Desactivar</button>
+
+    <input id="ipBR" placeholder="Agregar IP">
+    <button onclick="agregarIP('BR')">Agregar</button>
+
+    <ul id="listaBR"></ul>
+</div>
+
+<script>
+
+let data = {
+    BR: {
+        active: true,
+        ips: ["186.23.164.145"]
+    }
+};
+
+function render() {
+    let lista = document.getElementById("listaBR");
+    lista.innerHTML = "";
+
+    data.BR.ips.forEach(ip => {
+        let li = document.createElement("li");
+        li.textContent = ip;
+        lista.appendChild(li);
+    });
+}
+
+function agregarIP(evento) {
+    let input = document.getElementById("ipBR").value;
+    if (!input) return;
+
+    data[evento].ips.push(input);
+    render();
+}
+
+function activar(evento) {
+    data[evento].active = true;
+    alert("Evento activado");
+}
+
+function desactivar(evento) {
+    data[evento].active = false;
+    alert("Evento desactivado");
+}
+
+render();
+
+</script>
+
+</body>
+</html>
