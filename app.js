@@ -4,7 +4,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const licenses = {
-    BR: ["186.23.164.145"]
+    BR: ["186.23.164.146"]
 };
 
 app.get("/license", (req, res) => {
