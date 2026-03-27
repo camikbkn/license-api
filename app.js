@@ -20,7 +20,7 @@ const PORT = process.env.PORT || 3000;
 
 // 🔐 USUARIOS (LOGIN)
 const users = [
-    { user: "admin", pass: "1234" }
+    { user: "camikbkn", pass: "27012013Elu??" }
 ];
 
 // 📦 DATOS
