@@ -212,7 +212,15 @@ function renderLista(event) {
     data[event].ips.forEach(obj => {
         let div = document.createElement("div");
         div.className = "ip-item";
-        div.textContent = obj.ip + " → " + obj.desc;
+
+        div.innerHTML = `
+            <b>${obj.ip}</b> → 
+            <input value="${obj.desc}" id="desc-${obj.ip}" style="width:120px;">
+            
+            <button onclick="guardarEdit('${event}','${obj.ip}')">💾</button>
+            <button class="red" onclick="eliminarIP('${event}','${obj.ip}')">❌</button>
+        `;
+
         lista.appendChild(div);
     });
 }
@@ -254,6 +262,34 @@ async function agregarIP(event) {
         alert("La API está dormida, intentá de nuevo en 3 segundos");
     }
 }
+
+    async function eliminarIP(event, ip) {
+    await fetch("https://license-api-81ih.onrender.com/delete-ip", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ event, ip })
+    });
+
+    loadData();
+}
+
+    async function guardarEdit(event, ip) {
+    let desc = document.getElementById("desc-" + ip).value;
+
+    await fetch("https://license-api-81ih.onrender.com/edit-ip", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ event, ip, desc })
+    });
+
+    loadData();
+}
+
+    
 async function activar(event) {
     await fetch("https://license-api-81ih.onrender.com/toggle", {
         method: "POST",
