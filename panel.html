@@ -146,11 +146,11 @@ async function loadData() {
     try {
         const res = await fetch("https://license-api-81ih.onrender.com/data");
         data = await res.json();
-        renderHome();
     } catch (e) {
-        alert("Error cargando datos");
-        console.error(e);
+        console.warn("API caída, usando datos locales");
     }
+
+    renderHome(); // 👈 SIEMPRE entra
 }
 
 
