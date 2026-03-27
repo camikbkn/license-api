@@ -225,7 +225,7 @@ async function agregarIP(event) {
     if (!ip) return;
 
     try {
-        await fetch("https://license-api-81ih.onrender.com/add-ip", {
+        const res = await fetch("https://license-api-81ih.onrender.com/add-ip", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -233,14 +233,20 @@ async function agregarIP(event) {
             body: JSON.stringify({ event, ip, desc })
         });
 
-        await loadData(); // 👈 recarga desde API
+        const result = await res.json();
+
+        if (!result.success) {
+            alert("La API respondió error");
+            return;
+        }
+
+        await loadData();
 
     } catch (e) {
-        console.error(e);
-        alert("Error guardando en API");
+        console.error("ERROR REAL:", e);
+        alert("No conecta con API (posible sleep de Render)");
     }
 }
-
 async function activar(event) {
     await fetch("https://license-api-81ih.onrender.com/toggle", {
         method: "POST",
