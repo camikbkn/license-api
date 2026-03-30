@@ -1,12 +1,10 @@
 const express = require("express");
 const app = express();
-const fs = require("fs");
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb+srv://admin:27012013Elu@cluster0.b1h2exo.mongodb.net/?appName=Cluster0")
-.then(() => console.log("Mongo conectado"))
-.catch(err => console.log(err));
+app.use(express.json());
 
+// 🌐 CORS
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
@@ -19,35 +17,30 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.json());
+// 🔌 MONGO
+mongoose.connect("mongodb+srv://admin:27012013Elu@cluster0.b1h2exo.mongodb.net/?retryWrites=true&w=majority")
+.then(() => console.log("✅ Mongo conectado"))
+.catch(err => console.log("❌ Error Mongo:", err));
 
-const PORT = process.env.PORT || 3000;
+// 📦 MODELO
+const LicenseSchema = new mongoose.Schema({
+    event: String,
+    active: Boolean,
+    ips: [
+        {
+            ip: String,
+            desc: String
+        }
+    ]
+});
 
-// 🔐 USUARIOS (LOGIN)
+const License = mongoose.model("License", LicenseSchema);
+
+// 🔐 LOGIN
 const users = [
     { user: "camikbkn", pass: "27012013Elu??" }
 ];
 
-// 📦 DATOS
-let licenses = {};
-
-function loadLicenses() {
-    try {
-        const data = fs.readFileSync("licenses.json");
-        licenses = JSON.parse(data);
-    } catch (e) {
-        console.error("Error cargando licenses.json", e);
-    }
-}
-
-function saveLicenses() {
-    fs.writeFileSync("licenses.json", JSON.stringify(licenses, null, 2));
-}
-
-// cargar al iniciar
-loadLicenses();
-
-// 🔐 LOGIN
 app.post("/login", (req, res) => {
     const { user, pass } = req.body;
 
@@ -58,83 +51,113 @@ app.post("/login", (req, res) => {
     res.json({ success: false });
 });
 
-// 📥 GET LICENCIAS
-app.get("/data", (req, res) => {
-    res.json(licenses);
+// 📥 GET DATA
+app.get("/data", async (req, res) => {
+    const list = await License.find();
+
+    let result = {};
+
+    list.forEach(l => {
+        result[l.event] = {
+            active: l.active,
+            ips: l.ips
+        };
+    });
+
+    res.json(result);
 });
 
-// ➕ AGREGAR IP
-app.post("/add-ip", (req, res) => {
+// ➕ ADD IP
+app.post("/add-ip", async (req, res) => {
     const { event, ip, desc } = req.body;
 
-    if (!licenses[event]) {
-        licenses[event] = { active: true, ips: [] };
+    let lic = await License.findOne({ event });
+
+    if (!lic) {
+        lic = new License({
+            event,
+            active: true,
+            ips: []
+        });
     }
 
-    licenses[event].ips.push({ ip, desc });
+    lic.ips.push({ ip, desc });
 
-    saveLicenses(); // 👈 CLAVE
+    await lic.save();
 
     res.json({ success: true });
 });
 
-// ❌ ELIMINAR IP
-app.post("/delete-ip", (req, res) => {
+// ❌ DELETE IP
+app.post("/delete-ip", async (req, res) => {
     const { event, ip } = req.body;
 
-    if (licenses[event]) {
-        licenses[event].ips = licenses[event].ips.filter(i => i.ip !== ip);
-    }
+    let lic = await License.findOne({ event });
 
-    saveLicenses();
+    if (lic) {
+        lic.ips = lic.ips.filter(i => i.ip !== ip);
+        await lic.save();
+    }
 
     res.json({ success: true });
 });
 
-// ✏️ EDITAR IP (solo descripción)
-app.post("/edit-ip", (req, res) => {
+// ✏️ EDIT IP
+app.post("/edit-ip", async (req, res) => {
     const { event, ip, desc } = req.body;
 
-    if (licenses[event]) {
-        const found = licenses[event].ips.find(i => i.ip === ip);
+    let lic = await License.findOne({ event });
+
+    if (lic) {
+        const found = lic.ips.find(i => i.ip === ip);
         if (found) {
             found.desc = desc;
+            await lic.save();
         }
     }
 
-    saveLicenses();
-
     res.json({ success: true });
 });
 
-// 🔄 ACTIVAR / DESACTIVAR
-app.post("/toggle", (req, res) => {
+// 🔄 TOGGLE
+app.post("/toggle", async (req, res) => {
     const { event, active } = req.body;
 
-    if (licenses[event]) {
-        licenses[event].active = active;
+    let lic = await License.findOne({ event });
+
+    if (lic) {
+        lic.active = active;
+    } else {
+        lic = new License({
+            event,
+            active,
+            ips: []
+        });
     }
 
-    saveLicenses();
+    await lic.save();
 
     res.json({ success: true });
 });
 
 // 🎯 VALIDACIÓN (JAVA)
-app.get("/license", (req, res) => {
+app.get("/license", async (req, res) => {
     const { ip, event } = req.query;
 
-    const data = licenses[event];
+    const lic = await License.findOne({ event });
 
-    if (!data || !data.active) return res.send("NO");
+    if (!lic || !lic.active) return res.send("NO");
 
-    if (data.ips.find(i => i.ip === ip)) {
+    if (lic.ips.find(i => i.ip === ip)) {
         return res.send("OK");
     }
 
     return res.send("NO");
 });
 
+// 🚀 START
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-    console.log("API PRO RUNNING");
+    console.log("🚀 API PRO RUNNING");
 });
