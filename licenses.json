@@ -4,5 +4,11 @@
     "ips": [
       { "ip": "186.23.164.145", "desc": "Ip de Pipi" }
     ]
+  },
+  "DS": {
+    "active": true,
+    "ips": [
+      { "ip": "TU_IP_PUBLICA", "desc": "Discord habilitado" }
+    ]
   }
 }
