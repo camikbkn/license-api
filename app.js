@@ -50,14 +50,6 @@ async function initEvents() {
     }
 }
 
-// 🔌 MONGO (DESPUÉS DEL MODELO Y FUNCIÓN)
-mongoose.connect("mongodb+srv://admin:27012013Elu@cluster0.b1h2exo.mongodb.net/?retryWrites=true&w=majority")
-.then(async () => {
-    console.log("✅ Mongo conectado");
-    await initEvents();
-})
-.catch(err => console.log("❌ Error Mongo:", err));
-
 // 🔐 LOGIN
 const users = [
     { user: "camikbkn", pass: "27012013Elu??" }
@@ -177,9 +169,17 @@ app.get("/license", async (req, res) => {
     return res.send("NO");
 });
 
-// 🚀 START
+// 🚀 START (CORRECTO)
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log("🚀 API PRO RUNNING");
-});
+mongoose.connect("mongodb+srv://admin:27012013Elu@cluster0.b1h2exo.mongodb.net/?retryWrites=true&w=majority")
+.then(async () => {
+    console.log("✅ Mongo conectado");
+
+    await initEvents(); // 🔥 CREA BR Y DS SI NO EXISTEN
+
+    app.listen(PORT, () => {
+        console.log("🚀 API PRO RUNNING");
+    });
+})
+.catch(err => console.log("❌ Error Mongo:", err));
