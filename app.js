@@ -17,11 +17,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// 🔌 MONGO
-mongoose.connect("mongodb+srv://admin:27012013Elu@cluster0.b1h2exo.mongodb.net/?retryWrites=true&w=majority")
-.then(() => console.log("✅ Mongo conectado"))
-.catch(err => console.log("❌ Error Mongo:", err));
-
 // 📦 MODELO
 const LicenseSchema = new mongoose.Schema({
     event: String,
@@ -35,6 +30,33 @@ const LicenseSchema = new mongoose.Schema({
 });
 
 const License = mongoose.model("License", LicenseSchema);
+
+// 🔥 INIT EVENTOS
+async function initEvents() {
+    const events = ["BR", "DS"];
+
+    for (let ev of events) {
+        let exist = await License.findOne({ event: ev });
+
+        if (!exist) {
+            await new License({
+                event: ev,
+                active: true,
+                ips: []
+            }).save();
+
+            console.log("Evento creado:", ev);
+        }
+    }
+}
+
+// 🔌 MONGO (DESPUÉS DEL MODELO Y FUNCIÓN)
+mongoose.connect("mongodb+srv://admin:27012013Elu@cluster0.b1h2exo.mongodb.net/?retryWrites=true&w=majority")
+.then(async () => {
+    console.log("✅ Mongo conectado");
+    await initEvents();
+})
+.catch(err => console.log("❌ Error Mongo:", err));
 
 // 🔐 LOGIN
 const users = [
