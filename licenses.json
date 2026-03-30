@@ -3,14 +3,6 @@
     "active": true,
     "ips": [
       { "ip": "186.23.164.145", "desc": "Ip de Pipi" }
-      { "ip": "181.46.136.36", "desc": "Ip casa" }
-    ]
-  },
-
-  "DS": {
-    "active": true,
-    "ips": [
-      { "ip": "181.46.136.36", "desc": "ip casa" }
     ]
   }
 }
