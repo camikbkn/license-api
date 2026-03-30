@@ -153,12 +153,16 @@ function login() {
 async function loadData() {
     try {
         const res = await fetch("https://license-api-81ih.onrender.com/data");
-        data = await res.json();
+
+        if (res.ok) {
+            data = await res.json();
+        }
+
     } catch (e) {
         console.warn("API caída, usando datos locales");
     }
 
-    renderHome(); // 👈 SIEMPRE entra
+    renderHome();
 }
 
 
@@ -323,7 +327,9 @@ async function desactivar(event) {
 }
 
 // INIT
-renderLogin();
+window.onload = function() {
+    renderLogin();
+};
 
 </script>
 
